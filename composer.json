@@ -15,11 +15,17 @@
             "email": "sandrogehri@gmail.com"
         }
     ],
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/yungifez/tailwind-merge-php.git"
+        }
+    ],
     "require": {
         "php": "^8.1.0",
         "guzzlehttp/guzzle": "^7.5.1",
         "laravel/framework": "^10.9.0|^11.0|^12.0",
-        "gehrisandro/tailwind-merge-php": "^v1.1.0"
+        "gehrisandro/tailwind-merge-php": "dev-tailwind-v4"
     },
     "require-dev": {
         "laravel/pint": "^1.13.8",
