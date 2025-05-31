@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace TailwindMerge\Laravel;
 
+use Illuminate\Support\Arr;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 use Illuminate\View\Compilers\BladeCompiler;
 use Illuminate\View\ComponentAttributeBag;
@@ -44,21 +45,53 @@ class TailwindMergeServiceProvider extends BaseServiceProvider
                 return;
             }
 
-            $bladeCompiler->directive($name, fn (?string $expression): string => "<?php echo twMerge($expression); ?>");
+            $bladeCompiler->directive($name, fn (?string $expression): string =>  "<?php echo twMerge($expression); ?>");
         });
     }
 
     protected function registerAttributesBagMacros(): void
     {
         ComponentAttributeBag::macro('twMerge', function (...$args): ComponentAttributeBag {
+            $filteredArgs = [];
+            if (gettype($args[0]) == 'array') {
+                $args = $args[0];
+            }
+
+            foreach ($args as $key => $value) {
+                if ($value == false) {
+                    continue;
+                }
+
+                if (gettype($key) == 'string') {
+                    array_push($filteredArgs, $key);
+                }else{
+                    array_push($filteredArgs, $value);
+                }
+            }
             /** @var ComponentAttributeBag $this */
-            $this->offsetSet('class', resolve(TailwindMergeContract::class)->merge($args, ($this->get('class', ''))));
+            $this->offsetSet('class', resolve(TailwindMergeContract::class)->merge($filteredArgs, ($this->get('class', ''))));
 
             return $this;
         });
 
         ComponentAttributeBag::macro('twMergeFor', function (string $for, ...$args): ComponentAttributeBag {
             /** @var ComponentAttributeBag $this */
+            $filteredArgs = [];
+            if (gettype($args[0]) == 'array') {
+                $args = $args[0];
+            }
+
+            foreach ($args as $key => $value) {
+                if ($value == false) {
+                    continue;
+                }
+
+                if (gettype($key) == 'string') {
+                    array_push($filteredArgs, $key);
+                }else{
+                    array_push($filteredArgs, $value);
+                }
+            }
 
             /** @var TailwindMergeContract $instance */
             $instance = resolve(TailwindMergeContract::class);
@@ -68,7 +101,7 @@ class TailwindMergeServiceProvider extends BaseServiceProvider
             /** @var string $classes */
             $classes = $this->get($attribute, '');
 
-            $this->offsetSet('class', $instance->merge($args, $classes));
+            $this->offsetSet('class', $instance->merge($filteredArgs, $classes));
 
             return $this->only('class');
         });
